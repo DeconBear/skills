@@ -6,6 +6,9 @@ demo/
 **/.env
 !.env.example
 
+# Node dependencies (adm-zip) inside the npx wrapper package
+packages/get-skill/node_modules/
+
 # Project-level Claude guidance — kept local to this checkout, not shared
 CLAUDE.md
 
