@@ -6,6 +6,9 @@ demo/
 **/.env
 !.env.example
 
+# Project-level Claude guidance — kept local to this checkout, not shared
+CLAUDE.md
+
 # Build artifacts (e.g. packaged skill zips from `package_skill.py`)
 dist/
 
