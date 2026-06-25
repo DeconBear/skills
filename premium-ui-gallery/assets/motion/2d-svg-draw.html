@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2D Pattern · SVG path draw + morph</title>
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --text: #FAFAFA;
+      --muted: #8A8A8A;
+      --accent: #D4FF4F;
+      --border: rgba(255,255,255,0.08);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
+    .stage { min-height: 100vh; display: grid; place-items: center; padding: 40px 24px; }
+    .panel { display: grid; gap: 48px; width: 100%; max-width: 640px; }
+    .demo { padding: 32px; border: 1px solid var(--border); border-radius: 16px; background: #111; display: grid; gap: 16px; }
+    .demo h3 { margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+    .demo svg { width: 100%; height: auto; display: block; }
+    .stroke-demo path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* The pattern: set stroke-dasharray to the path's length, animate dashoffset to 0. */
+    .draw {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: draw 3s var(--ease-out) infinite;
+    }
+    @keyframes draw {
+      0%   { stroke-dashoffset: 1000; }
+      60%  { stroke-dashoffset: 0; }
+      90%  { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -1000; }
+    }
+    /* The morph demo uses SMIL <animate> on the d attribute. */
+    .morph-demo path { fill: var(--accent); opacity: 0.18; }
+    .morph-demo path.alt { fill: none; stroke: var(--accent); stroke-width: 2; }
+    .back { position: fixed; top: 16px; left: 16px; color: var(--muted); font-size: 13px; text-decoration: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 999px; }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+    .note { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .draw { animation: none; stroke-dashoffset: 0; }
+    }
+  </style>
+</head>
+<body>
+  <a class="back" href="./">← All patterns</a>
+  <div class="stage">
+    <div class="panel">
+      <div class="demo stroke-demo">
+        <h3>Path draw-on · stroke-dashoffset</h3>
+        <svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path class="draw" d="M20 80 C 60 20, 100 20, 140 80 S 220 140, 260 80 S 340 20, 380 80" />
+          <path class="draw" style="animation-delay: 0.4s" d="M20 100 L 80 100 L 100 80 L 160 100 L 200 60 L 240 100 L 300 80 L 320 100 L 380 100" />
+        </svg>
+      </div>
+      <div class="demo morph-demo">
+        <h3>Path morph · animate d between two shapes</h3>
+        <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="var(--accent)" opacity="0.18">
+            <animate attributeName="d" dur="6s" repeatCount="indefinite"
+              values="
+                M50 100 C 50 50, 150 50, 200 100 S 350 150, 350 100 S 250 50, 200 100 S 50 150, 50 100 Z;
+                M50 60 L 350 60 L 350 140 L 50 140 Z;
+                M200 50 L 350 150 L 50 150 Z;
+                M200 50 C 280 50, 350 100, 350 150 S 250 200, 200 150 S 50 100, 200 50 Z;
+                M50 100 C 50 50, 150 50, 200 100 S 350 150, 350 100 S 250 50, 200 100 S 50 150, 50 100 Z
+              "
+              keyTimes="0; 0.25; 0.5; 0.75; 1"
+              calcMode="spline"
+              keySplines="0.22 1 0.36 1; 0.22 1 0.36 1; 0.22 1 0.36 1; 0.22 1 0.36 1"
+            />
+          </path>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="note">SVG draw + morph · 3s + 6s loops</div>
+</body>
+</html>

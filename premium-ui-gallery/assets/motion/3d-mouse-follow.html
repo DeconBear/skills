@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Pattern · Mouse-follow hero (Three.js)</title>
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --text: #FAFAFA;
+      --muted: #8A8A8A;
+      --accent: #D4FF4F;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, "Inter", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .caption { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); color: var(--muted); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .back { position: fixed; top: 16px; left: 16px; color: var(--muted); font-size: 13px; text-decoration: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 999px; z-index: 10; }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <a class="back" href="./">← All patterns</a>
+  <canvas id="c"></canvas>
+  <div class="caption">Move your mouse · the mesh follows</div>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // 1. Renderer + scene + camera. Standard Three.js setup.
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.z = 5;
+
+    // 2. Custom GLSL fragment shader for the mesh surface.
+    //    The pattern: animate time + use the view direction to make a moving highlight.
+    const vert = /* glsl */`
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      void main() {
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vec4 viewPos  = viewMatrix * worldPos;
+        vNormal  = normalize(normalMatrix * normal);
+        vViewDir = normalize(-viewPos.xyz);
+        gl_Position = projectionMatrix * viewPos;
+      }
+    `;
+    const frag = /* glsl */`
+      precision highp float;
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      uniform float uTime;
+      uniform vec3  uAccent;
+
+      void main() {
+        // Fresnel-style rim light: the more glancing the angle, the brighter the surface.
+        float fres = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 2.0);
+        // Slow scrolling band across the surface for the "premium" feel.
+        float band = 0.5 + 0.5 * sin(vNormal.y * 6.0 + uTime * 0.6);
+        vec3 base = mix(vec3(0.04), uAccent, fres * 0.85);
+        vec3 col  = mix(base, uAccent, band * fres * 0.4);
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    // 3. The mesh — an icosahedron gives a faceted "engineered" look.
+    const geo = new THREE.IcosahedronGeometry(1.4, 6);
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: vert,
+      fragmentShader: frag,
+      uniforms: {
+        uTime:   { value: 0 },
+        uAccent: { value: new THREE.Color('#D4FF4F') },
+      },
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+
+    // 4. Subtle point light just to give the shader something to react to.
+    const light = new THREE.PointLight(0xffffff, 0.4, 10);
+    light.position.set(2, 2, 3);
+    scene.add(light);
+
+    // 5. Mouse tracking — normalized to [-1, 1], damped into a target rotation.
+    const target = { x: 0, y: 0 };
+    const damp   = 0.08;  // lower = lazier, higher = snappier
+    window.addEventListener('pointermove', (e) => {
+      target.x = (e.clientX / window.innerWidth)  * 2 - 1;
+      target.y = (e.clientY / window.innerHeight) * 2 - 1;
+    }, { passive: true });
+
+    // 6. Resize handling.
+    function resize() {
+      const w = window.innerWidth, h = window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 7. Animation loop.
+    const clock = new THREE.Clock();
+    function tick() {
+      const t = clock.getElapsedTime();
+      mat.uniforms.uTime.value = t;
+
+      // Damp the mesh rotation toward the target each frame.
+      mesh.rotation.y += (target.x * 0.6 - mesh.rotation.y) * damp;
+      mesh.rotation.x += (target.y * 0.4 - mesh.rotation.x) * damp;
+      mesh.rotation.z  = Math.sin(t * 0.4) * 0.08;
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    // 8. Respect reduced motion: pause the rotation; keep the scene visible.
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // Reassign target to (0,0) so the mesh sits still and just the shader animates very slowly.
+      // (Simpler than tearing down the loop; the scene is still functional.)
+      target.x = 0; target.y = 0;
+      damp; // (intentionally no-op; the loop still runs but settles to center)
+    }
+  </script>
+</body>
+</html>

@@ -49,6 +49,23 @@ Use it as a self-audit: for each section, mark the work **Strong / Acceptable / 
 - [ ] **Loading states use skeleton or shimmer**, not spinners, for content. Spinners only for actions.
 - [ ] **Page transitions** (if any) are <300ms and use a single property (opacity or transform), not both.
 
+### Pattern selection (2D + 3D)
+
+The principles above are the *rules*. The patterns below are the *vocabulary*. For concrete, ready-to-use implementations, see `references/motion-patterns.md` and the templates in `assets/motion/`.
+
+| What you want | Pattern | Where |
+|---|---|---|
+| Hero headline feels alive | Scroll-reveal cascade (stagger 60–100ms) | `assets/motion/2d-scroll-reveal.html` |
+| Headline deserves drama | Text spotlight reveal (one-time or loop) | `assets/motion/2d-text-spotlight.html` |
+| Brand mark / logo intro | SVG path draw-on | `assets/motion/2d-svg-draw.html` |
+| Customer logos / ticker | Kinetic marquee with edge fade (no template — see catalog) | `references/motion-patterns.md` §2D #4 |
+| Hero with a 3D object | Mouse-follow 3D hero with custom shader | `assets/motion/3d-mouse-follow.html` |
+| Ambient / data-viz backdrop | GPU particle field with twinkle | `assets/motion/3d-particle-field.html` |
+| Logo / card grid in 3D | 3D photo wall with depth + parallax | `assets/motion/3d-photo-wall.html` |
+| Image that "breathes" | Distortion shader plane (no template — see catalog) | `references/motion-patterns.md` §3D #4 |
+
+**Choreography rule:** one motion per viewport at a time. Layer in *time* (sequentially), not in *space* (overlapping). Lead with the slowest motion and let faster ones support it.
+
 ## 5. Imagery & Iconography
 
 - [ ] **One icon family** — e.g. `hugeicons` stroke-rounded, Lucide, Phosphor, Tabler. Don't mix stroke + solid. Match corner radius to button radius.

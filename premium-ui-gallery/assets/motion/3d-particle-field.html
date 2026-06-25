@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Pattern · Particle field (Three.js)</title>
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root { --bg: #0A0A0A; --text: #FAFAFA; --muted: #8A8A8A; --accent: #D4FF4F; --border: rgba(255,255,255,0.08); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, "Inter", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .caption { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); color: var(--muted); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .back { position: fixed; top: 16px; left: 16px; color: var(--muted); font-size: 13px; text-decoration: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 999px; z-index: 10; }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+  </style>
+  <script type="importmap">
+  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <a class="back" href="./">← All patterns</a>
+  <canvas id="c"></canvas>
+  <div class="caption">2,500 GPU particles · twinkle + parallax</div>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+    camera.position.z = 6;
+
+    // 1. Generate particle positions in a sphere. Each particle gets a random "phase" for twinkle.
+    const COUNT = 2500;
+    const positions = new Float32Array(COUNT * 3);
+    const phases    = new Float32Array(COUNT);
+    const sizes     = new Float32Array(COUNT);
+    for (let i = 0; i < COUNT; i++) {
+      // Spherical distribution with a slight bias toward the equator.
+      const r     = 4 + Math.random() * 6;
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos((Math.random() * 2 - 1) * 0.85);
+      positions[i*3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+      positions[i*3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      positions[i*3 + 2] = r * Math.cos(phi);
+      phases[i] = Math.random() * Math.PI * 2;
+      sizes[i]  = 0.5 + Math.random() * 1.5;
+    }
+
+    // 2. Custom shader: positions are static; size and opacity twinkle in the fragment shader.
+    const vert = /* glsl */`
+      attribute float aPhase;
+      attribute float aSize;
+      uniform float uTime;
+      uniform float uPxRatio;
+      varying float vPhase;
+      void main() {
+        vPhase = aPhase;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        // Distance-based size attenuation (closer = bigger).
+        gl_PointSize = aSize * uPxRatio * (300.0 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }
+    `;
+    const frag = /* glsl */`
+      precision highp float;
+      uniform vec3  uAccent;
+      uniform float uTime;
+      varying float vPhase;
+      void main() {
+        // Round, soft-edged point.
+        vec2 c = gl_PointCoord - 0.5;
+        float d = length(c);
+        if (d > 0.5) discard;
+        float falloff = smoothstep(0.5, 0.0, d);
+        // Twinkle: each particle has its own phase, modulated by time.
+        float twinkle = 0.45 + 0.55 * sin(uTime * 1.8 + vPhase * 6.2831);
+        gl_FragColor = vec4(uAccent, falloff * twinkle);
+      }
+    `;
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('aPhase',   new THREE.BufferAttribute(phases, 1));
+    geo.setAttribute('aSize',    new THREE.BufferAttribute(sizes, 1));
+
+    const mat = new THREE.ShaderMaterial({
+      vertexShader:   vert,
+      fragmentShader: frag,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime:     { value: 0 },
+        uAccent:   { value: new THREE.Color('#D4FF4F') },
+        uPxRatio:  { value: renderer.getPixelRatio() },
+      },
+    });
+
+    const points = new THREE.Points(geo, mat);
+    scene.add(points);
+
+    // 3. Mouse parallax — gentle drift of the whole field toward the cursor.
+    const target = { x: 0, y: 0 };
+    window.addEventListener('pointermove', (e) => {
+      target.x = (e.clientX / window.innerWidth)  * 2 - 1;
+      target.y = (e.clientY / window.innerHeight) * 2 - 1;
+    }, { passive: true });
+
+    function resize() {
+      const w = window.innerWidth, h = window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const clock = new THREE.Clock();
+    function tick() {
+      mat.uniforms.uTime.value = clock.getElapsedTime();
+      // Damp the camera offset toward the mouse target.
+      camera.position.x += (target.x * 0.6 - camera.position.x) * 0.05;
+      camera.position.y += (-target.y * 0.4 - camera.position.y) * 0.05;
+      camera.lookAt(0, 0, 0);
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
+    tick();
+  </script>
+</body>
+</html>

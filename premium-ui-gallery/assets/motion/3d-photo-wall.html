@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Pattern · Photo / card wall (Three.js)</title>
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root { --bg: #0A0A0A; --text: #FAFAFA; --muted: #8A8A8A; --accent: #D4FF4F; --border: rgba(255,255,255,0.08); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, "Inter", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .caption { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); color: var(--muted); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .back { position: fixed; top: 16px; left: 16px; color: var(--muted); font-size: 13px; text-decoration: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 999px; z-index: 10; }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+  </style>
+  <script type="importmap">
+  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <a class="back" href="./">← All patterns</a>
+  <canvas id="c"></canvas>
+  <div class="caption">5×4 wall · parallax + scroll-driven rotation</div>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 12);
+
+    // 1. Build a 5×4 wall of plane meshes. Each cell gets a procedural colored texture.
+    const COLS = 5, ROWS = 4;
+    const CELL_W = 1.6, CELL_H = 1.0, GAP = 0.25;
+    const TOTAL_W = COLS * (CELL_W + GAP);
+    const TOTAL_H = ROWS * (CELL_H + GAP);
+
+    function makeCellTexture(hue, accent) {
+      // Procedural canvas texture — no external images required.
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 160;
+      const g = c.getContext('2d');
+      // Background: dark with a subtle vertical gradient.
+      const grad = g.createLinearGradient(0, 0, 0, 160);
+      grad.addColorStop(0, '#161616');
+      grad.addColorStop(1, '#0c0c0c');
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 256, 160);
+      // Accent shape.
+      g.fillStyle = accent;
+      g.globalAlpha = 0.18;
+      g.beginPath();
+      g.arc(60 + (hue * 30) % 80, 80, 36, 0, Math.PI * 2);
+      g.fill();
+      g.globalAlpha = 1;
+      // Label.
+      g.fillStyle = '#FAFAFA';
+      g.font = '500 14px Inter, system-ui, sans-serif';
+      g.fillText(['Frame', 'Image', 'Card', 'Tile'][hue % 4] + ' ' + (hue + 1), 16, 140);
+      // Border.
+      g.strokeStyle = 'rgba(255,255,255,0.08)';
+      g.lineWidth = 1;
+      g.strokeRect(0.5, 0.5, 255, 159);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    const wall = new THREE.Group();
+    const ACCENTS = ['#D4FF4F', '#60A5FA', '#C084FC', '#FF7A59'];
+    let i = 0;
+    for (let r = 0; r < ROWS; r++) {
+      for (let col = 0; col < COLS; col++) {
+        const tex = makeCellTexture(i, ACCENTS[i % ACCENTS.length]);
+        const mat = new THREE.MeshBasicMaterial({ map: tex });
+        const geo = new THREE.PlaneGeometry(CELL_W, CELL_H);
+        const m = new THREE.Mesh(geo, mat);
+        m.position.x = -TOTAL_W/2 + col * (CELL_W + GAP) + CELL_W/2;
+        m.position.y =  TOTAL_H/2 - r * (CELL_H + GAP) - CELL_H/2;
+        // Subtle Z variation — gives the wall depth and a "stacked" feel.
+        m.position.z = (Math.sin(col * 0.7 + r * 0.5) * 0.4);
+        wall.add(m);
+        i++;
+      }
+    }
+    scene.add(wall);
+
+    // 2. Lighting is not needed (MeshBasicMaterial), but a subtle ambient helps if we swap materials.
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+    // 3. Mouse + scroll drive the wall's rotation.
+    const target = { x: 0, y: 0 };
+    let scrollT = 0, scrollTarget = 0;
+    window.addEventListener('pointermove', (e) => {
+      target.x = (e.clientX / window.innerWidth)  * 2 - 1;
+      target.y = (e.clientY / window.innerHeight) * 2 - 1;
+    }, { passive: true });
+    window.addEventListener('wheel', () => { scrollTarget += 0.4; }, { passive: true });
+
+    function resize() {
+      const w = window.innerWidth, h = window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function tick() {
+      // Damped scroll + mouse → wall rotation.
+      scrollT += (scrollTarget - scrollT) * 0.06;
+      wall.rotation.y += (target.x * 0.25 - wall.rotation.y) * 0.05;
+      wall.rotation.x += (-target.y * 0.15 - wall.rotation.x) * 0.05;
+      wall.position.y = Math.sin(scrollT * 0.5) * 0.3;
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
+    tick();
+  </script>
+</body>
+</html>

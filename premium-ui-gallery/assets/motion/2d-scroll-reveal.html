@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2D Pattern · Scroll-reveal cascade</title>
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --text: #FAFAFA;
+      --muted: #8A8A8A;
+      --accent: #D4FF4F;
+      --border: rgba(255,255,255,0.08);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --t-slow: 700ms;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, "Inter", sans-serif; -webkit-font-smoothing: antialiased; line-height: 1.5; }
+    .container { max-width: 720px; margin: 0 auto; padding: 80px 24px; }
+    h1 { font-size: clamp(32px, 5vw, 56px); letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 16px; }
+    .lead { color: var(--muted); font-size: 18px; margin: 0 0 48px; }
+    .group { display: grid; gap: 16px; margin: 64px 0; }
+    .card { padding: 28px; border: 1px solid var(--border); border-radius: 14px; background: #111; }
+    .card h3 { margin: 0 0 6px; font-size: 20px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    .footer { border-top: 1px solid var(--border); padding-top: 32px; color: var(--muted); font-size: 14px; }
+    .back { display: inline-block; margin-bottom: 32px; color: var(--muted); font-size: 14px; text-decoration: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 999px; }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* The pattern: any element with [data-reveal] animates in from below + scales up + fades. */
+    [data-reveal] {
+      --delay: 0ms;
+      opacity: 0;
+      transform: translateY(14px) scale(0.97);
+      transition: opacity var(--t-slow) var(--ease-out) var(--delay),
+                  transform var(--t-slow) var(--ease-out) var(--delay);
+      will-change: opacity, transform;
+    }
+    [data-reveal].in {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal] { opacity: 1; transform: none; transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="./">← All patterns</a>
+
+    <h1 data-reveal>Scroll-reveal cascade</h1>
+    <p class="lead" data-reveal style="--delay: 80ms">
+      Elements fade, lift, and scale into view as they enter the viewport.
+      Stagger via the <code>--delay</code> custom property.
+    </p>
+
+    <div class="group">
+      <div class="card" data-reveal style="--delay: 0ms">
+        <h3>First card</h3>
+        <p>Reveals the moment it intersects the viewport — no scroll listener needed.</p>
+      </div>
+      <div class="card" data-reveal style="--delay: 80ms">
+        <h3>Second card</h3>
+        <p>Staggered by 80ms. Below the fold? Scroll down to trigger.</p>
+      </div>
+      <div class="card" data-reveal style="--delay: 160ms">
+        <h3>Third card</h3>
+        <p>Staggered by 160ms. The cascade feels intentional, not simultaneous.</p>
+      </div>
+      <div class="card" data-reveal style="--delay: 240ms">
+        <h3>Fourth card</h3>
+        <p>And so on. Use 60–100ms steps for a calm feel, 30–50ms for an energetic one.</p>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="card" data-reveal style="--delay: 0ms">
+        <h3>Far down the page</h3>
+        <p>This card only animates when you scroll to it. That's the whole point.</p>
+      </div>
+      <div class="card" data-reveal style="--delay: 80ms">
+        <h3>And the next one</h3>
+        <p>IntersectionObserver fires once per element, then unobserves — no re-animation on scroll-up.</p>
+      </div>
+    </div>
+
+    <p class="footer" data-reveal>
+      Implementation: ~15 lines of JS (IntersectionObserver) + 8 lines of CSS.
+    </p>
+  </div>
+
+  <script>
+    // The pattern: observe elements, add `.in` when they enter the viewport.
+    (function () {
+      const els = document.querySelectorAll('[data-reveal]');
+      if (!('IntersectionObserver' in window)) {
+        els.forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(el => io.observe(el));
+    })();
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 ---
 name: premium-ui-gallery
-description: This skill should be used when the user asks to design, redesign, or implement high-end, polished frontend UI — landing pages, SaaS marketing sites, navbars, CTAs, components, branding/color systems, or iconography — and wants the agent to draw inspiration from a curated set of professional design galleries. It bundles a curated knowledge base of 10 design-inspiration resources (curated.design / Craftwork, landing.love, saaspo, navbar.gallery, cta.gallery, mobbin, rebrand.gallery, hugeicons, component.gallery, godly / recent.design), a routing table that maps each UI section to the best gallery to consult, and a high-end UI design checklist. Use it whenever the user says things like "make this look premium", "借鉴这些设计画廊", "参考 landing.love / mobbin / navbar.gallery", "高端前端 UI", or explicitly invokes one of the listed galleries.
+description: This skill should be used when the user asks to design, redesign, or implement high-end, polished frontend UI — landing pages, SaaS marketing sites, navbars, CTAs, components, branding/color systems, iconography, or 2D/3D motion (scroll-reveal cascades, 3D hero scenes, particle fields, SVG path draws, etc.) — and wants the agent to draw inspiration from a curated set of professional design galleries. It bundles a curated knowledge base of 10 design-inspiration resources (curated.design / Craftwork, landing.love, saaspo, navbar.gallery, cta.gallery, mobbin, rebrand.gallery, hugeicons, component.gallery, godly / recent.design), a routing table that maps each UI section to the best gallery to consult, a high-end UI design checklist, and a motion pattern catalog (2D + 3D, inspired by vibe-motion's technique-driven approach — original code only). Use it whenever the user says things like "make this look premium", "借鉴这些设计画廊", "参考 landing.love / mobbin / navbar.gallery", "高端前端 UI", "2D/3D 动画", or explicitly invokes one of the listed galleries.
 ---
 
 # Premium UI Gallery
@@ -52,21 +52,35 @@ From the chosen gallery, identify:
 
 Do not copy a site's copy or imagery verbatim. Extract the *pattern* and rewrite.
 
-### 4. Apply the high-end UI checklist
+### 4. Choose motion patterns (2D + 3D)
 
-Before writing code, cross-check the design against `references/design-principles.md`. Premium UI consistently satisfies these — generic UI skips them. Resolve every "weak" item before shipping.
+If the section is meant to *move* — and most premium sections are — pick 1–3 patterns from `references/motion-patterns.md` and adapt the corresponding template from `assets/motion/`. Don't decorate; choreograph (one motion per viewport, layered in time, not in space).
 
-### 5. Implement with semantic, production-ready code
+Routing:
+- **Hero headline reveal** → 2D text-spotlight or scroll-reveal cascade.
+- **Logo / customer wall** → 2D kinetic marquee or 3D photo-wall.
+- **Hero with depth** → 3D mouse-follow hero or 3D particle-field.
+- **Brand mark / icon intro** → 2D SVG path draw.
+- **Ambient backdrop** → 3D particle-field.
+
+The motion catalog is **inspired by vibe-motion's** technique-driven approach (text mask reveals, scroll-triggered cascades, 3D scenes, particle systems) — but every template in `assets/motion/` is original code, written from a clean-room understanding of the techniques, not copied.
+
+### 5. Apply the high-end UI checklist
+
+Before writing code, cross-check the design against `references/design-principles.md`. Premium UI consistently satisfies these — generic UI skips them. Resolve every "weak" item before shipping. The Section 4 (Motion) of that checklist now also points to the pattern catalog for concrete pattern choices.
+
+### 6. Implement with semantic, production-ready code
 
 - Use semantic HTML (`header`, `nav`, `main`, `section`, `article`, `footer`).
 - Establish a design-token layer (CSS custom properties or Tailwind config) for color, spacing, type, radius, shadow, motion.
 - Choose a type system (e.g. Inter/Geist for UI, a serif for editorial contrast, or a display face for hero) and stick to a 4–6 step scale.
 - Add real interactive states: hover, focus-visible, active, disabled. No static mockups.
-- Respect `prefers-reduced-motion` and `prefers-color-scheme`.
+- Respect `prefers-reduced-motion` and `prefers-color-scheme`. Every motion template already does — preserve that when adapting.
 - Keep CSS organized: tokens → base → components → utilities.
 - Use `hugeicons` (or similar consistent family) for icons — never mix stroke + solid across one UI.
+- For 3D: load Three.js from CDN via importmap, defer scene creation until the canvas enters the viewport, and always provide a 2D fallback.
 
-### 6. Verify and refine
+### 7. Verify and refine
 
 - Render and screenshot the result. Compare against the inspiration gallery entry that drove the design.
 - Check spacing rhythm (does the vertical cadence feel consistent?), contrast (WCAG AA minimum), and motion (does it feel intentional, not decorative?).
@@ -84,9 +98,26 @@ The full curated knowledge base. Contains a **routing table** at the top (UI sec
 
 Load this file when step 2 (routing) or step 3 (extraction) runs. The routing table alone is small enough to skim; the per-gallery sections are read on demand.
 
+### references/motion-patterns.md
+
+A catalog of motion patterns (2D + 3D) with when-to-use, technique, and a pointer to the ready-to-use original implementation in `assets/motion/`. Includes a framework reference to Disney's 12 animation principles, composition rules, and performance / accessibility notes. Load this at step 4 (choosing motion patterns). The catalog header documents the inspiration lineage: techniques borrowed from [vibe-motion](https://github.com/vibe-motion), code is original.
+
 ### references/design-principles.md
 
-A distilled checklist of what separates high-end UI from generic UI: typography, color, spacing, motion, imagery, hierarchy, microinteractions, and accessibility. Apply this at step 4 before implementing. Treat it as a hard gate — every "weak" item must be resolved.
+A distilled checklist of what separates high-end UI from generic UI: typography, color, spacing, motion, imagery, hierarchy, microinteractions, and accessibility. Apply this at step 5 before implementing. Treat it as a hard gate — every "weak" item must be resolved. The Motion section of this checklist now also routes to `references/motion-patterns.md` for concrete pattern choices.
+
+### assets/motion/
+
+Six self-contained, original HTML templates that demonstrate the patterns from `references/motion-patterns.md`. Open them in a browser to see the effect, then copy the relevant CSS/JS into the project. Each template is framework-free (vanilla JS + CSS for 2D, Three.js via importmap for 3D), respects `prefers-reduced-motion`, and is ~150–250 lines so it can be read end-to-end.
+
+| File | Pattern |
+|---|---|
+| `2d-scroll-reveal.html` | IntersectionObserver cascade with staggered fade/translate/scale |
+| `2d-text-spotlight.html` | Stage-lighting text reveal via gradient mask + glow |
+| `2d-svg-draw.html` | SVG stroke-dashoffset draw-on + path morph (SMIL) |
+| `3d-mouse-follow.html` | Three.js icosahedron with custom GLSL shader, damped mouse parallax |
+| `3d-particle-field.html` | GPU-instanced Points with twinkle shader + camera parallax |
+| `3d-photo-wall.html` | Grid of textured planes with depth offset + scroll/mouse parallax |
 
 ## Output expectations
 
