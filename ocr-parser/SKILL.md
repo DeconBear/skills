@@ -1,6 +1,6 @@
 ---
 name: ocr-parser
-description: This skill should be used when the user wants to perform OCR (extract text from images or PDFs) and wants the agent to invoke a provider-agnostic OCR tool. Supports three providers — Alibaba DashScope Qwen-VL-OCR, Volcano Engine Ark (火山方舟) Doubao vision OCR, and Unisound (云知声) U1 OCR — via a single CLI (`scripts/ocr_parser.py --provider <name>`). Use when the user says "OCR this image", "把 PDF 转成文字 / Markdown", "识别图片中的文字", "extract text from this PDF", or explicitly invokes one of the supported providers.
+description: This skill should be used when the user wants to perform OCR (extract text from images or PDFs) and wants the agent to invoke a provider-agnostic OCR tool. Supports three providers — Alibaba DashScope Qwen-VL-OCR, Volcano Engine Ark (火山方舟) Doubao vision OCR, and Unisound (云知声) U1 OCR — via a single CLI (run scripts/ocr_parser.py with --provider qwen, --provider volcano, or --provider unisound). Use when the user says "OCR this image", "把 PDF 转成文字 / Markdown", "识别图片中的文字", "extract text from this PDF", or explicitly invokes one of the supported providers.
 ---
 
 # OCR Parser (multi-provider)
