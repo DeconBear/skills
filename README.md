@@ -1,5 +1,9 @@
 # skills
 
+[English](README.md) · [中文](README-zh.md)
+
+---
+
 A small collection of [Claude Code](https://claude.ai/code) skills. Each skill gives
 Claude specialized instructions plus, optionally, executable helpers, reference material,
 and ready-to-use assets. Developed here in source, then copied into
