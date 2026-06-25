@@ -62,9 +62,31 @@ python scripts/vision.py ask ./screenshot.png "根据报错，最可能的原因
 ```
 Then answer the user based on the returned text.
 
+## Configuration
+
+The script reads `DASHSCOPE_API_KEY` from the first place it finds it (existing env vars
+always win over file values):
+
+1. **Process environment** — Windows User/System env vars, or `export` in your shell.
+2. **`./.env`** in the current working directory — project-local override (useful for testing).
+3. **`~/.claude/.env`** — global Claude Code config. **Recommended** for your real key, because
+   it lives outside any repo and survives shell restarts.
+
+A template is committed as `vision/.env.example`. Copy it to one of the locations above and
+fill in your key:
+
+```bash
+# Recommended — one file for all of Claude Code:
+cp vision/.env.example ~/.claude/.env
+# Then edit ~/.claude/.env and replace the placeholder with your real key.
+```
+
+> **Never commit a real `.env` file.** The repo's `.gitignore` already excludes `.env` and
+> allows only `.env.example` to be tracked.
+
 ## Requirements
 
-- `DASHSCOPE_API_KEY` environment variable must be set (Qwen-VL / DashScope).
+- `DASHSCOPE_API_KEY` available via the methods above (Qwen-VL / DashScope).
 - Python 3.7+ (stdlib only — no pip install needed).
 - Optional: override model with `VISION_MODEL` (default `qwen-vl-max`).
 

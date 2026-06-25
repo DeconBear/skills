@@ -8,7 +8,9 @@ Subcommands:
 <image> may be a local file path or an http(s) URL. Local files are read,
 base64-encoded and sent as a data URI; URLs are forwarded as-is.
 
-Auth: set DASHSCOPE_API_KEY in the environment.
+Auth: set DASHSCOPE_API_KEY in the environment, OR place it in a .env file
+the script will auto-load (see load_dotenv() below). Existing env vars
+take precedence over .env values.
 Override model with VISION_MODEL (default: qwen-vl-max).
 """
 import argparse
@@ -30,6 +32,43 @@ for _stream in (sys.stdout, sys.stderr):
 
 DEFAULT_API_BASE = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 DEFAULT_MODEL = "qwen-vl-max"
+
+
+def load_dotenv():
+    """Load KEY=VALUE pairs from .env files into os.environ.
+
+    Does NOT override existing environment variables — the process env always wins,
+    so this is purely a fallback for users who prefer a file over registry/shell vars.
+
+    Lookup order (all files are read; per-key, first-set wins via `os.environ` check):
+      1. ./.env  in the current working directory (project-local override)
+      2. ~/.claude/.env  (global Claude Code config — recommended for your real key)
+    """
+    candidates = [
+        os.path.join(os.getcwd(), ".env"),
+        os.path.expanduser("~/.claude/.env"),
+    ]
+    for path in candidates:
+        if not os.path.isfile(path):
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                for raw in f:
+                    line = raw.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, _, val = line.partition("=")
+                    key = key.strip()
+                    val = val.strip().strip('"').strip("'")
+                    if key and key not in os.environ:
+                        os.environ[key] = val
+        except OSError:
+            # unreadable .env — silently skip, don't break the script
+            pass
+
+
+# Auto-load on import. Safe to call multiple times (idempotent).
+load_dotenv()
 
 
 def api_url():
