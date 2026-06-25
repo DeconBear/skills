@@ -37,16 +37,24 @@ DEFAULT_MODEL = "qwen-vl-max"
 def load_dotenv():
     """Load KEY=VALUE pairs from .env files into os.environ.
 
-    Does NOT override existing environment variables — the process env always wins,
-    so this is purely a fallback for users who prefer a file over registry/shell vars.
+    Does NOT override existing environment variables — the process env always wins.
+    Per-key, the first file to set a value wins (subsequent files skip already-set keys).
 
-    Lookup order (all files are read; per-key, first-set wins via `os.environ` check):
-      1. ./.env  in the current working directory (project-local override)
-      2. ~/.claude/.env  (global Claude Code config — recommended for your real key)
+    Recommended home for the real key:
+      <skill_dir>/.env  — the installed skill's own folder.
+        Example: ~/.claude/skills/vision/.env
+        Lives outside any repo, scoped to the skill that uses it, survives shell restarts.
+
+    Optional override (for testing):
+      ./.env  in the current working directory — a project-local .env wins over the
+      skill's .env for keys it defines, which is handy when iterating.
     """
+    skill_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Read CWD first so a project-local .env can override the skill's canonical .env
+    # for testing; the skill's .env then fills in any remaining keys.
     candidates = [
         os.path.join(os.getcwd(), ".env"),
-        os.path.expanduser("~/.claude/.env"),
+        os.path.join(skill_dir, ".env"),
     ]
     for path in candidates:
         if not os.path.isfile(path):

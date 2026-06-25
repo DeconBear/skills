@@ -68,17 +68,16 @@ The script reads `DASHSCOPE_API_KEY` from the first place it finds it (existing 
 always win over file values):
 
 1. **Process environment** — Windows User/System env vars, or `export` in your shell.
-2. **`./.env`** in the current working directory — project-local override (useful for testing).
-3. **`~/.claude/.env`** — global Claude Code config. **Recommended** for your real key, because
-   it lives outside any repo and survives shell restarts.
+2. **`./.env`** in the current working directory — project-local override (useful for testing). Wins over the skill's .env.
+3. **`<skill_dir>/.env`** — the installed skill's own folder, e.g. `~/.claude/skills/vision/.env`. **Recommended** for your real key, because it's scoped to the skill and lives outside any repo.
 
-A template is committed as `vision/.env.example`. Copy it to one of the locations above and
-fill in your key:
+A template is committed as `vision/.env.example`. Copy it to the installed location and fill
+in your key:
 
 ```bash
-# Recommended — one file for all of Claude Code:
-cp vision/.env.example ~/.claude/.env
-# Then edit ~/.claude/.env and replace the placeholder with your real key.
+# Recommended — one .env per installed skill:
+cp vision/.env.example ~/.claude/skills/vision/.env
+# Then edit ~/.claude/skills/vision/.env and replace the placeholder with your real key.
 ```
 
 > **Never commit a real `.env` file.** The repo's `.gitignore` already excludes `.env` and
