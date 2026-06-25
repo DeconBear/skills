@@ -1,0 +1,13 @@
+# Demos produced by skills — kept locally, not committed
+demo/
+
+# Build artifacts (e.g. packaged skill zips from `package_skill.py`)
+dist/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+.vscode/
+.idea/
