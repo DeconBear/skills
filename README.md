@@ -23,16 +23,38 @@ call its helpers. The skill-creator convention is
 
 ## Install
 
-Skills live in source under each subdirectory. To use one globally:
+Three ways to get a skill into `~/.claude/skills/`. Pick whichever fits your setup.
+
+**1. From this repo (development install):**
 
 ```bash
-# From the repo root
 cp -r ./<skill-name>/. "$HOME/.claude/skills/<skill-name>/"
 ```
 
-Repeat for each skill you want available in every session. The `cp -r ././` form copies
-the directory *contents* into the destination, including a `.env.example` template but
-**never** a real `.env` (see Configuration below).
+**2. From GitHub, no git history (recommended for end users — needs Node):**
+
+```bash
+# npx degit clones a subdirectory without the .git folder
+npx degit DeconBear/skills/<skill-name> "$HOME/.claude/skills/<skill-name>"
+```
+
+**3. From a GitHub release zip (no Node needed — works on any machine with `curl` + `unzip`):**
+
+```bash
+SKILL=<skill-name>
+curl -L -o "/tmp/$SKILL.zip" \
+  "https://github.com/DeconBear/skills/releases/download/$SKILL-v0.1.0/$SKILL.zip"
+unzip "/tmp/$SKILL.zip" -d "$HOME/.claude/skills/$SKILL"
+```
+
+After any of these, fill the keys in `~/.claude/skills/<skill>/.env` (see
+[Configuration](#configuration--the-one-strict-rule) below). Each skill's
+`.env.example` shows the variables you can set; only the ones for providers
+you actually use are required.
+
+> Want a one-liner polished npx UX like `npx @decon/get-skill <name>`? That
+> requires publishing a small npm package — possible, see the FAQ-style
+> discussion in `references/install-options.md` (or open an issue).
 
 ## Configuration — the one strict rule
 

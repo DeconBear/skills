@@ -18,14 +18,36 @@
 
 ## 安装
 
-Skills 在源码中以子目录形式存在。要全局启用一个:
+把一个 skill 放到 `~/.claude/skills/` 有三种方式,选适合你的:
+
+**1. 从本仓库(开发安装):**
 
 ```bash
-# 从仓库根目录
 cp -r ./<skill-name>/. "$HOME/.claude/skills/<skill-name>/"
 ```
 
-为每个你希望在每个会话里都能用的 skill 各执行一次。`cp -r ././` 这种形式把目录的*内容*复制到目标位置,包括 `.env.example` 模板,但**绝不**包含真实的 `.env`(见下面的"配置")。
+**2. 从 GitHub,不下载 git 历史(推荐给终端用户 —— 需要 Node):**
+
+```bash
+# npx degit 克隆子目录但不带 .git 文件夹
+npx degit DeconBear/skills/<skill-name> "$HOME/.claude/skills/<skill-name>"
+```
+
+**3. 从 GitHub Release 下载 zip(不需要 Node —— 任何装了 curl + unzip 的机器都行):**
+
+```bash
+SKILL=<skill-name>
+curl -L -o "/tmp/$SKILL.zip" \
+  "https://github.com/DeconBear/skills/releases/download/$SKILL-v0.1.0/$SKILL.zip"
+unzip "/tmp/$SKILL.zip" -d "$HOME/.claude/skills/$SKILL"
+```
+
+任何一种方式装好后,在 `~/.claude/skills/<skill>/.env` 里填入你有的 key(见下面的
+[配置](#配置--唯一硬规则))。每个 skill 的 `.env.example` 列出了可用的环境变量,
+只需要填你实际要用到的提供商对应的那些。
+
+> 想要 `npx @decon/get-skill <name>` 这种一行命令的精致 npx 体验?那需要发一个
+> 小的 npm 包 —— 可以做,见 `references/install-options.md`(或开 issue)。
 
 ## 配置 — 唯一硬规则
 
