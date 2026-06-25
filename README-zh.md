@@ -18,36 +18,46 @@
 
 ## 安装
 
-把一个 skill 放到 `~/.claude/skills/` 有三种方式,选适合你的:
-
-**1. 从本仓库(开发安装):**
+最快的路径 —— 一行命令,直接从对应的 GitHub release 下载 skill 并解压到
+`~/.claude/skills/<skill>/`:
 
 ```bash
-cp -r ./<skill-name>/. "$HOME/.claude/skills/<skill-name>/"
+npx @decon/get-skill ocr-parser      # 也可以是 vision, premium-ui-gallery
 ```
 
-**2. 从 GitHub,不下载 git 历史(推荐给终端用户 —— 需要 Node):**
+`[@decon/get-skill](packages/get-skill/)` 是一个 ~100 行、仅一个运行时依赖的
+小 CLI,放在本仓库的 `packages/get-skill/` 目录下。它会:
+
+- 从 GitHub 下载 `<skill>-<version>` release zip(自动跟随 302 跳到
+  `objects.githubusercontent.com`),
+- 解压到 `~/.claude/skills/<skill>/`(或你用 `--dest` 指定的其他位置),
+- 如果 skill 自带 `.env.example` 但还没有 `.env`,会打印出接下来要跑的
+  `cp` + 编辑命令。
+
+也支持版本固定:`npx @decon/get-skill ocr-parser --version v0.2.0`(未来有
+新版本时)。
+
+### 备选安装方式
+
+如果不想用 Node,或者你是从本仓库源码安装:
 
 ```bash
-# npx degit 克隆子目录但不带 .git 文件夹
-npx degit DeconBear/skills/<skill-name> "$HOME/.claude/skills/<skill-name>"
-```
-
-**3. 从 GitHub Release 下载 zip(不需要 Node —— 任何装了 curl + unzip 的机器都行):**
-
-```bash
-SKILL=<skill-name>
+# Release zip —— curl + unzip,不需要 npm(任何 *nix 和装了 Git Bash 的 Windows 都能跑)
+SKILL=ocr-parser
 curl -L -o "/tmp/$SKILL.zip" \
   "https://github.com/DeconBear/skills/releases/download/$SKILL-v0.1.0/$SKILL.zip"
 unzip "/tmp/$SKILL.zip" -d "$HOME/.claude/skills/$SKILL"
+
+# 只克隆子目录 —— degit,不下载 git 历史(需要 Node)
+npx degit DeconBear/skills/ocr-parser "$HOME/.claude/skills/ocr-parser"
+
+# 从本仓库源码 —— 开发用
+cp -r ./ocr-parser/. "$HOME/.claude/skills/ocr-parser/"
 ```
 
-任何一种方式装好后,在 `~/.claude/skills/<skill>/.env` 里填入你有的 key(见下面的
+任何方式装好后,在 `~/.claude/skills/<skill>/.env` 里填入你有的 key(见下面的
 [配置](#配置--唯一硬规则))。每个 skill 的 `.env.example` 列出了可用的环境变量,
 只需要填你实际要用到的提供商对应的那些。
-
-> 想要 `npx @decon/get-skill <name>` 这种一行命令的精致 npx 体验?那需要发一个
-> 小的 npm 包 —— 可以做,见 `references/install-options.md`(或开 issue)。
 
 ## 配置 — 唯一硬规则
 

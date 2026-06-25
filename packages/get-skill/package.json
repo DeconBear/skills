@@ -1,0 +1,42 @@
+{
+  "name": "@decon/get-skill",
+  "version": "0.1.0",
+  "description": "Download and install a Claude Code skill from DeconBear/skills (premium-ui-gallery, vision, ocr-parser) into ~/.claude/skills/.",
+  "bin": {
+    "decon-get-skill": "bin/decon-get-skill.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node bin/decon-get-skill.js ocr-parser --version v0.1.0"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "skill",
+    "ocr",
+    "vision",
+    "ui",
+    "design",
+    "installer",
+    "npx"
+  ],
+  "author": "DeconBear",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeconBear/skills.git",
+    "directory": "packages/get-skill"
+  },
+  "homepage": "https://github.com/DeconBear/skills#readme",
+  "bugs": "https://github.com/DeconBear/skills/issues"
+}

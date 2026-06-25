@@ -23,38 +23,47 @@ call its helpers. The skill-creator convention is
 
 ## Install
 
-Three ways to get a skill into `~/.claude/skills/`. Pick whichever fits your setup.
-
-**1. From this repo (development install):**
+The fastest path — one command, downloads the skill straight from the
+matching GitHub release and extracts it to `~/.claude/skills/<skill>/`:
 
 ```bash
-cp -r ./<skill-name>/. "$HOME/.claude/skills/<skill-name>/"
+npx @decon/get-skill ocr-parser      # or: vision, premium-ui-gallery
 ```
 
-**2. From GitHub, no git history (recommended for end users — needs Node):**
+The `[@decon/get-skill](packages/get-skill/)` wrapper is a tiny (~100 lines, one
+runtime dep) CLI that lives in this repo under `packages/get-skill/`. It:
+
+- downloads the `<skill>-<version>` release zip from GitHub (following the 302 to
+  `objects.githubusercontent.com`),
+- extracts it into `~/.claude/skills/<skill>/` (or `--dest` if you want it elsewhere),
+- and if the skill ships a `.env.example` and no `.env` yet, prints the exact
+  `cp` + edit command to run next.
+
+It also works for pinning: `npx @decon/get-skill ocr-parser --version v0.2.0`
+once a future release exists.
+
+### Alternative install methods
+
+If you'd rather not use Node, or you're working from this repo's source:
 
 ```bash
-# npx degit clones a subdirectory without the .git folder
-npx degit DeconBear/skills/<skill-name> "$HOME/.claude/skills/<skill-name>"
-```
-
-**3. From a GitHub release zip (no Node needed — works on any machine with `curl` + `unzip`):**
-
-```bash
-SKILL=<skill-name>
+# Release zip — curl + unzip, no npm (works on any *nix and on Windows with Git Bash)
+SKILL=ocr-parser
 curl -L -o "/tmp/$SKILL.zip" \
   "https://github.com/DeconBear/skills/releases/download/$SKILL-v0.1.0/$SKILL.zip"
 unzip "/tmp/$SKILL.zip" -d "$HOME/.claude/skills/$SKILL"
+
+# Clone just the subdirectory — degit, no git history (needs Node)
+npx degit DeconBear/skills/ocr-parser "$HOME/.claude/skills/ocr-parser"
+
+# From this repo's source — for development
+cp -r ./ocr-parser/. "$HOME/.claude/skills/ocr-parser/"
 ```
 
-After any of these, fill the keys in `~/.claude/skills/<skill>/.env` (see
-[Configuration](#configuration--the-one-strict-rule) below). Each skill's
-`.env.example` shows the variables you can set; only the ones for providers
-you actually use are required.
-
-> Want a one-liner polished npx UX like `npx @decon/get-skill <name>`? That
-> requires publishing a small npm package — possible, see the FAQ-style
-> discussion in `references/install-options.md` (or open an issue).
+After any install, fill the API key in `~/.claude/skills/<skill>/.env` (see
+[Configuration](#configuration--the-one-strict-rule)) for any skill that needs one.
+Each skill's `.env.example` shows the variables you can set; only the ones for
+providers you actually use are required.
 
 ## Configuration — the one strict rule
 
