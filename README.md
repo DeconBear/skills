@@ -132,4 +132,4 @@ in the upstream skills repo walks through the process.
 
 ## License
 
-TBD. Add a `LICENSE` file before publishing.
+[MIT](./LICENSE) © 2026 DeconBear.

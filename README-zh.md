@@ -100,4 +100,4 @@ git diff --cached --name-only | grep -E '(^|/)\.env$' | grep -v '\.env\.example$
 
 ## 许可证
 
-TBD。发布前请添加一个 `LICENSE` 文件。
+[MIT](./LICENSE) © 2026 DeconBear。
