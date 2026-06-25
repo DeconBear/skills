@@ -1,12 +1,12 @@
-# @decon/get-skill
+# @deconbear/get-skill
 
 > A one-liner installer for the [DeconBear/skills](https://github.com/DeconBear/skills)
 > collection of Claude Code skills.
 
 ```bash
-npx @decon/get-skill ocr-parser
-npx @decon/get-skill vision
-npx @decon/get-skill premium-ui-gallery
+npx @deconbear/get-skill ocr-parser
+npx @deconbear/get-skill vision
+npx @deconbear/get-skill premium-ui-gallery
 ```
 
 Each command downloads the corresponding skill's latest release zip from
@@ -17,7 +17,7 @@ skills that need an API key.
 ## Usage
 
 ```
-npx @decon/get-skill <skill> [--dest PATH] [--version VER]
+npx @deconbear/get-skill <skill> [--dest PATH] [--version VER]
 
 Skills:
   - premium-ui-gallery
@@ -36,16 +36,16 @@ Options:
 
 ```bash
 # Default: install ocr-parser to ~/.claude/skills/ocr-parser
-npx @decon/get-skill ocr-parser
+npx @deconbear/get-skill ocr-parser
 
 # Install to a custom path
-npx @decon/get-skill vision --dest ./my-skill
+npx @deconbear/get-skill vision --dest ./my-skill
 
 # Pin to a specific release
-npx @decon/get-skill premium-ui-gallery --version v0.1.0
+npx @deconbear/get-skill premium-ui-gallery --version v0.1.0
 
 # List available skills
-npx @decon/get-skill --list
+npx @deconbear/get-skill --list
 ```
 
 ## How it works

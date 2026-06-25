@@ -2,7 +2,7 @@
 'use strict';
 /* eslint-disable no-console */
 //
-// @decon/get-skill — install a Claude Code skill from DeconBear/skills
+// @deconbear/get-skill — install a Claude Code skill from DeconBear/skills
 // by downloading its GitHub release zip and extracting it.
 //
 const https = require('https');
@@ -17,7 +17,7 @@ const KNOWN_SKILLS = ['premium-ui-gallery', 'vision', 'ocr-parser'];
 
 function printHelp() {
   const lines = [
-    'Usage: npx @decon/get-skill <skill> [--dest PATH] [--version VER]',
+    'Usage: npx @deconbear/get-skill <skill> [--dest PATH] [--version VER]',
     '',
     'Downloads a skill from ' + REPO + ' GitHub releases and extracts it',
     'into your Claude Code skills directory.',
@@ -34,9 +34,9 @@ function printHelp() {
   lines.push('  -h, --help       show this help');
   lines.push('');
   lines.push('Examples:');
-  lines.push('  npx @decon/get-skill ocr-parser');
-  lines.push('  npx @decon/get-skill vision --dest ./my-skill');
-  lines.push('  npx @decon/get-skill premium-ui-gallery --version v0.2.0');
+  lines.push('  npx @deconbear/get-skill ocr-parser');
+  lines.push('  npx @deconbear/get-skill vision --dest ./my-skill');
+  lines.push('  npx @deconbear/get-skill premium-ui-gallery --version v0.2.0');
   process.stdout.write(lines.join('\n') + '\n');
 }
 

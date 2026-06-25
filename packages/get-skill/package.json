@@ -1,5 +1,5 @@
 {
-  "name": "@decon/get-skill",
+  "name": "@deconbear/get-skill",
   "version": "0.1.0",
   "description": "Download and install a Claude Code skill from DeconBear/skills (premium-ui-gallery, vision, ocr-parser) into ~/.claude/skills/.",
   "bin": {

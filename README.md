@@ -27,10 +27,10 @@ The fastest path — one command, downloads the skill straight from the
 matching GitHub release and extracts it to `~/.claude/skills/<skill>/`:
 
 ```bash
-npx @decon/get-skill ocr-parser      # or: vision, premium-ui-gallery
+npx @deconbear/get-skill ocr-parser      # or: vision, premium-ui-gallery
 ```
 
-The `[@decon/get-skill](packages/get-skill/)` wrapper is a tiny (~100 lines, one
+The `[@deconbear/get-skill](packages/get-skill/)` wrapper is a tiny (~100 lines, one
 runtime dep) CLI that lives in this repo under `packages/get-skill/`. It:
 
 - downloads the `<skill>-<version>` release zip from GitHub (following the 302 to
@@ -39,7 +39,7 @@ runtime dep) CLI that lives in this repo under `packages/get-skill/`. It:
 - and if the skill ships a `.env.example` and no `.env` yet, prints the exact
   `cp` + edit command to run next.
 
-It also works for pinning: `npx @decon/get-skill ocr-parser --version v0.2.0`
+It also works for pinning: `npx @deconbear/get-skill ocr-parser --version v0.2.0`
 once a future release exists.
 
 ### Alternative install methods

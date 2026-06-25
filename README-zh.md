@@ -22,10 +22,10 @@
 `~/.claude/skills/<skill>/`:
 
 ```bash
-npx @decon/get-skill ocr-parser      # 也可以是 vision, premium-ui-gallery
+npx @deconbear/get-skill ocr-parser      # 也可以是 vision, premium-ui-gallery
 ```
 
-`[@decon/get-skill](packages/get-skill/)` 是一个 ~100 行、仅一个运行时依赖的
+`[@deconbear/get-skill](packages/get-skill/)` 是一个 ~100 行、仅一个运行时依赖的
 小 CLI,放在本仓库的 `packages/get-skill/` 目录下。它会:
 
 - 从 GitHub 下载 `<skill>-<version>` release zip(自动跟随 302 跳到
@@ -34,7 +34,7 @@ npx @decon/get-skill ocr-parser      # 也可以是 vision, premium-ui-gallery
 - 如果 skill 自带 `.env.example` 但还没有 `.env`,会打印出接下来要跑的
   `cp` + 编辑命令。
 
-也支持版本固定:`npx @decon/get-skill ocr-parser --version v0.2.0`(未来有
+也支持版本固定:`npx @deconbear/get-skill ocr-parser --version v0.2.0`(未来有
 新版本时)。
 
 ### 备选安装方式
